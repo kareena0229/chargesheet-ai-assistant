@@ -1,0 +1,8 @@
+venv/
+.venv/
+__pycache__/
+.env
+
+chargesheet-frontend/node_modules/
+chargesheet-frontend/.next/
+chargesheet-frontend/.turbo/

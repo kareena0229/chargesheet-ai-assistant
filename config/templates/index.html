@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chargesheet AI Assistant</title>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        h2 { color: #2c3e50; }
+        .card { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+        .present { color: green; font-weight: bold; }
+        .missing { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<h1>Chargesheet AI Assistant</h1>
+
+<form action="/analyze" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" required>
+    <button type="submit">Analyze Chargesheet</button>
+</form>
+
+{% if summary %}
+
+<div class="card">
+    <h2>Output A — Structured Case Summary</h2>
+    <p><strong>FIR Number:</strong> {{ summary.fir_number }}</p>
+    <p><strong>FIR Date:</strong> {{ summary.fir_date }}</p>
+    <p><strong>Police Station:</strong> {{ summary.police_station }}</p>
+    <p><strong>Legal Sections:</strong> {{ summary.legal_sections }}</p>
+    <p><strong>Incident Facts:</strong></p>
+    <p>{{ summary.incident_summary }}</p>
+</div>
+
+<div class="card">
+    <h2>Output B — Crime Classification</h2>
+
+    {% if classification.crime_type == "UNKNOWN" %}
+        <p class="missing">Crime Type: UNKNOWN</p>
+        <p>{{ classification.reason }}</p>
+    {% else %}
+        <p class="present">Crime Type: {{ classification.display_name }}</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Output C — Missing Items Checklist</h2>
+    <ul>
+        {% for item in checklist %}
+            <li>
+                {{ item.item }} :
+                {% if item.status == "PRESENT" %}
+                    <span class="present">✅ PRESENT</span>
+                {% else %}
+                    <span class="missing">❌ MISSING</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% endif %}
+
+</body>
+</html>
