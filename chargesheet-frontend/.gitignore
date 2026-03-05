@@ -1,11 +1,9 @@
 # Python
-venv/
 .venv/
+venv/
 __pycache__/
 *.pyc
 .env
-
-# Next.js
 node_modules/
 .next/
 .turbo/
