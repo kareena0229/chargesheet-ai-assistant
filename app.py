@@ -1,147 +1,128 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-import json
-import os
+import fitz
 import re
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 
-from services.pdf_reader import extract_text_from_pdf
-from services.preprocess import clean_text
+app = FastAPI()
 
-app = FastAPI(title="Chargesheet AI API")
-
-# ✅ CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ✅ Load checklist config
-with open("config/checklists.json", "r", encoding="utf-8") as f:
-    checklist_data = json.load(f)
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+checklist_items = [
+"FIR number and date",
+"Police station name",
+"Place and time of occurrence",
+"Details of complainant and accused",
+"Description of stolen property and value",
+"Recovery/seizure memo of property",
+"Witness statements",
+"Site plan / spot inspection memo",
+"Arrest memo",
+"Chain of custody of recovered items"
+]
 
 
-# -----------------------------
-# Extract Basic Fields
-# -----------------------------
-def extract_basic_fields(text):
-
-    fir_match = re.search(r"(?:FIR\s*No\.?\s*[:\-]?\s*(\S+))", text, re.IGNORECASE)
-    hindi_fir_match = re.search(r"(?:सं\s*[:\-]?\s*(\d+/\d+))", text)
-
-    fir_number = "Not Found"
-    if fir_match:
-        fir_number = fir_match.group(1)
-    elif hindi_fir_match:
-        fir_number = hindi_fir_match.group(1)
-
-    date_match = re.search(r"\b\d{1,2}/\d{1,2}/\d{2,4}\b", text)
-    fir_date = date_match.group(0) if date_match else "Not Found"
-
-    ps_match = re.search(r"(थाना\s*[^\n|]+)", text)
-    police_station = ps_match.group(0) if ps_match else "Not Found"
-
-    sections = []
-
-    grouped = re.findall(r"([\d/]+)\s*IPC", text, re.IGNORECASE)
-    for group in grouped:
-        numbers = group.split("/")
-        for num in numbers:
-            if num.strip().isdigit():
-                sections.append(f"IPC {num.strip()}")
-
-    direct = re.findall(r"IPC\s*(\d+)", text, re.IGNORECASE)
-    for num in direct:
-        sections.append(f"IPC {num.strip()}")
-
-    sections = list(set(sections))
-
-    return {
-        "fir_number": fir_number,
-        "fir_date": fir_date,
-        "police_station": police_station,
-        "legal_sections": sections
-    }
-
-
-# -----------------------------
-# Classification
-# -----------------------------
-def classify_crime(legal_sections):
-    for crime_key, crime_data in checklist_data.items():
-        for section in crime_data["typical_sections"]:
-            if section in legal_sections:
-                return crime_key
-    return "UNKNOWN"
-
-
-# -----------------------------
-# Checklist Validation
-# -----------------------------
-def validate_checklist(text, crime_type):
-
-    if crime_type == "UNKNOWN":
-        return []
-
-    required = checklist_data[crime_type]["required_items"]
-    results = []
-
-    for item in required:
-        if item.lower() in text.lower():
-            status = "PRESENT"
-        else:
-            status = "MISSING"
-
-        results.append({
-            "item": item,
-            "status": status
-        })
-
-    return results
-
-
-# -----------------------------
-# Routes
-# -----------------------------
 @app.get("/")
-def root():
-    return {"status": "Backend Running Successfully 🚀"}
+def home():
+    return {"status": "Backend Running 🚀"}
 
 
 @app.post("/api/analyze")
-async def analyze_pdf(file: UploadFile = File(...)):
+async def analyze(file: UploadFile = File(...)):
 
-    temp_path = f"temp_{file.filename}"
+    pdf_bytes = await file.read()
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
 
-    with open(temp_path, "wb") as f:
-        f.write(await file.read())
+    text = ""
 
-    raw_text = extract_text_from_pdf(temp_path)
-    cleaned_text = clean_text(raw_text)
-    os.remove(temp_path)
+    for page in doc:
+        text += page.get_text()
 
-    basic_info = extract_basic_fields(cleaned_text)
-    crime_type = classify_crime(basic_info["legal_sections"])
-    checklist = validate_checklist(cleaned_text, crime_type)
+    sentences = text.split("\n")
 
-    if crime_type == "UNKNOWN":
-        classification = {
-            "crime_type": "UNKNOWN",
-            "reason": "No matching sections found"
-        }
-    else:
-        classification = {
-            "crime_type": crime_type,
-            "display_name": checklist_data[crime_type]["display_name"]
-        }
+    # -------- Stage 1 Extraction -------- #
+
+    fir = re.findall(r'\d+/\d{4}', text)
+    sections = re.findall(r'IPC\s?\d+', text)
+
+    summary = {
+        "fir_number": fir[0] if fir else "Not Found",
+        "date": "Unknown",
+        "police_station": "Unknown",
+        "sections": sections if sections else []
+    }
+
+    # -------- Crime Classification -------- #
+
+    crime_type = "UNKNOWN"
+
+    if "379" in text or "380" in text or "392" in text:
+        crime_type = "Theft / Robbery"
+
+    elif "323" in text or "324" in text:
+        crime_type = "Assault / Hurt"
+
+    elif "66C" in text or "66D" in text:
+        crime_type = "Cyber Fraud"
+
+    elif "NDPS" in text:
+        crime_type = "NDPS"
+
+    # -------- Stage-2 Semantic Similarity -------- #
+
+    checklist = []
+
+    item_embeddings = model.encode(checklist_items)
+
+    sentence_embeddings = model.encode(sentences)
+
+    for i, item in enumerate(checklist_items):
+
+        sims = cosine_similarity([item_embeddings[i]], sentence_embeddings)[0]
+
+        best_score = max(sims)
+
+        best_sentence = sentences[sims.argmax()]
+
+        status = "MISSING"
+
+        if best_score > 0.75:
+            status = "PRESENT"
+
+        elif best_score > 0.55:
+            status = "PARTIAL"
+
+        checklist.append({
+            "item": item,
+            "status": status,
+            "similarity_score": round(float(best_score),2),
+            "matched_text": best_sentence[:150]
+        })
+
+    # -------- Stage-2A NER (Basic Rule Based) -------- #
+
+    entities = []
+
+    names = re.findall(r'[A-Z][a-z]+\s[A-Z][a-z]+', text)
+
+    for n in names[:5]:
+        entities.append({
+            "text": n,
+            "type": "PERSON"
+        })
 
     return {
-        "structured_summary": basic_info,
-        "crime_classification": classification,
-        "checklist_validation": checklist
+        "summary": summary,
+        "crime_type": crime_type,
+        "checklist": checklist,
+        "entities": entities
     }

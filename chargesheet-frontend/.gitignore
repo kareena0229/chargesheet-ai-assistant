@@ -1,8 +1,17 @@
+# Python
 venv/
 .venv/
 __pycache__/
+*.pyc
 .env
 
-chargesheet-frontend/node_modules/
-chargesheet-frontend/.next/
-chargesheet-frontend/.turbo/
+# Next.js
+node_modules/
+.next/
+.turbo/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
