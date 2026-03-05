@@ -1,54 +1,136 @@
-# chargesheet-ai-assistant
+# ⚖️ AI Chargesheet Analyzer
 
-An AI-powered system that analyzes Hindi police chargesheets and extracts structured legal insights.
+AI Chargesheet Analyzer is an intelligent system that analyzes legal charge sheets and identifies missing information, inconsistencies, and important legal checkpoints.
 
-The system automatically:
-- Generates a structured case summary
-- Classifies the crime type
-- Detects missing procedural documents
-- Extracts legal entities (NER)
-- Uses semantic similarity to detect evidence references
-
-This helps police officers and prosecutors quickly review large chargesheets and identify missing legal documents.
+The system uses Natural Language Processing (NLP) and semantic similarity models to assist investigators, legal professionals, and students in reviewing case documents efficiently.
 
 ---
 
-# Problem
+# 🚀 Features
 
-Police chargesheets in India are often:
-
-- 30–50 pages long
-- Written in Hindi
-- Contain OCR noise
-- Hard to review quickly
-- Missing critical procedural documents
-
-Manual review wastes time and can weaken cases during trial.
+• Upload and analyze a chargesheet document
+• AI-based document understanding
+• Automatic checklist generation
+• Detect missing legal elements
+• Highlight important sections
+• Fast and user-friendly interface
 
 ---
 
-# Solution
+# 🧠 Technology Stack
 
-Chargesheet AI Assistant processes raw Hindi chargesheet text and produces:
+Frontend
 
-### 1️⃣ Structured Case Summary
-Extracts:
+* Next.js
+* React
+* Tailwind CSS
 
-- FIR number
-- FIR date
-- Police station
-- Accused names
-- Victim names
-- Incident description
-- Legal sections (IPC / NDPS / IT Act)
+Backend
 
-Example output:
+* FastAPI
+* Python
 
-```json
-{
- "fir_number": "123/2024",
- "police_station": "Civil Lines",
- "accused": ["Ram Kumar"],
- "victim": ["Shyam Lal"],
- "sections": ["IPC 379"]
-}
+AI / NLP
+
+* Sentence Transformers
+* HuggingFace Models
+
+---
+
+# 🏗 System Architecture
+
+User → Frontend (Next.js) → FastAPI Backend → AI Model → Analysis Results
+
+Steps:
+
+1. User uploads a chargesheet
+2. Frontend sends file to FastAPI server
+3. Backend extracts text from PDF
+4. NLP model analyzes legal sections
+5. AI generates checklist and insights
+6. Results displayed in UI
+
+---
+
+# 📷 Screenshots
+
+Add screenshots of:
+
+• Upload Interface
+• Analysis Results
+• Checklist Output
+
+Example:
+
+![Upload Screen](screenshots/upload.png)
+
+![Analysis Result](screenshots/result.png)
+
+---
+
+# ⚙️ Installation Guide
+
+Clone repository
+
+git clone https://github.com/kareena0229/chargesheet-ai-assistant.git
+
+Go to project folder
+
+cd chargesheet-ai-assistant
+
+---
+
+## Backend Setup
+
+Create virtual environment
+
+python -m venv .venv
+
+Activate environment
+
+.venv\Scripts\activate
+
+Install dependencies
+
+pip install -r requirements.txt
+
+Run backend
+
+uvicorn app:app --reload
+
+---
+
+## Frontend Setup
+
+Open frontend folder
+
+cd chargesheet-frontend
+
+Install packages
+
+npm install
+
+Run frontend
+
+npm run dev
+
+Open browser
+
+http://localhost:3000
+
+---
+
+# 🎯 Future Improvements
+
+• Case law recommendation system
+• Evidence validation using AI
+• Multi-language legal support
+• Court document summarization
+
+---
+
+# 👩‍💻 Author
+
+Kareena Kumari
+
+AI / Software Engineering Project
