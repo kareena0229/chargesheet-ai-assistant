@@ -29,7 +29,6 @@ The system helps investigators, legal officers, and law enforcement agencies ens
 
 ## 🏗 Project Architecture
 
-```
 User Interface (Next.js)
         │
         ▼
@@ -49,9 +48,7 @@ Checklist Verification
         │
         ▼
 Results Displayed to User
-```
-
----
+------------------------
 
 ## 🛠 Tech Stack
 
