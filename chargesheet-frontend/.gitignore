@@ -1,15 +1,7 @@
-# Python
 .venv/
 venv/
 __pycache__/
 *.pyc
-.env
-node_modules/
 .next/
-.turbo/
-
-# Logs
-*.log
-
-# OS
-.DS_Store
+node_modules/
+.env
