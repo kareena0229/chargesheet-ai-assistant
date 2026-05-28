@@ -110,4 +110,4 @@ Kareena Kumari
 
 ## 📜 License
 
-This project is created for academic and research purposes.
+This project is created for academic and learning purposes.
