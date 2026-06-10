@@ -108,6 +108,39 @@ Kareena Kumari
 
 ---
 
+## 🤝 Open for Contributions
+
+Contributions are always welcome! 🚀
+
+If you'd like to improve this project, feel free to:
+
+* Fix bugs
+* Improve UI/UX
+* Add new AI features
+* Optimize backend performance
+* Improve documentation
+* Add OCR or multilingual support
+
+### Steps to Contribute
+
+1. Fork the repository
+2. Create a new branch
+3. Make your changes
+4. Commit your changes
+5. Open a Pull Request
+
+Please make sure your code follows clean coding practices and includes proper documentation.
+
+---
+
+## ⭐ Support the Project
+
+If you found this project useful, consider giving it a ⭐ on GitHub!
+
+Your support motivates further development and improvements. 💙
+
+
+
 ## 📜 License
 
 This project is created for academic and learning purposes.
