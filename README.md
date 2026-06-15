@@ -193,9 +193,22 @@ http://127.0.0.1:8001
 
 ---
 
-# 🖥 Screenshots
+## 🖥 Screenshots
 
-Add screenshots here after uploading them.
+### Upload & Analysis
+
+<img width="1920" height="1020" alt="Screenshot 2026-06-16 005434" src="https://github.com/user-attachments/assets/6dc11c96-af69-4c2e-971a-857c7b28c6e5" />
+
+<img width="1920" height="1020" alt="Screenshot 2026-06-16 011034" src="https://github.com/user-attachments/assets/640f7ea4-e309-4538-ac75-906a6e1b27e2" />
+
+
+
+### RAG Chat Assistant
+
+<img width="1920" height="1020" alt="Chargesheet RAG Analysis 2" src="https://github.com/user-attachments/assets/a185cf30-eefa-46c3-af69-00993de6727e" />
+<img width="1920" height="1020" alt="RAG Chat Chargesheet UI 11" src="https://github.com/user-attachments/assets/1e4443b2-dd21-4c98-8ed6-ac6f5a62b2fd" />
+
+
 
 Example:
 
