@@ -1,15 +1,9 @@
-.venv/
+venv/
 __pycache__/
 *.pyc
-
-# Environment
 .env
 
 # Next.js
 .next/
 node_modules/
 out/
-
-# OS
-.DS_Store
-Thumbs.db

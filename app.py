@@ -2,9 +2,12 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 import fitz
 import re
+from rag.loader import load_and_split_pdf
+from rag.embeddings import create_vector_store
+from rag.chatbot import ask_question
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-
+from pydantic import BaseModel
 app = FastAPI()
 
 app.add_middleware(
@@ -125,4 +128,38 @@ async def analyze(file: UploadFile = File(...)):
         "crime_type": crime_type,
         "checklist": checklist,
         "entities": entities
+    }
+
+# ==============================
+# RAG CHATBOT FEATURE
+# ==============================
+
+class ChatRequest(BaseModel):
+    question: str
+
+
+@app.post("/api/upload-rag")
+async def upload_rag(file: UploadFile = File(...)):
+
+    file_path = f"temp_{file.filename}"
+
+    with open(file_path, "wb") as f:
+        f.write(await file.read())
+
+    chunks = load_and_split_pdf(file_path)
+
+    create_vector_store(chunks)
+
+    return {
+        "message": "Document processed successfully"
+    }
+
+
+@app.post("/api/chat")
+async def chat(req: ChatRequest):
+
+    answer = ask_question(req.question)
+
+    return {
+        "answer": answer
     }
