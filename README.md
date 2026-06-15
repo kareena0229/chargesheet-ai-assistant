@@ -1,146 +1,265 @@
 # ⚖️ ChargeSheet AI Assistant
 
-AI-powered system that automatically analyzes police chargesheets and identifies missing or incomplete legal sections using Natural Language Processing.
+AI-powered legal-tech platform that analyzes police chargesheets, detects missing legal sections, and enables contextual interaction with documents using Retrieval-Augmented Generation (RAG).
 
-The system helps investigators, legal officers, and law enforcement agencies ensure that chargesheets are complete before submission.
+The system helps investigators, legal officers, and law enforcement agencies validate chargesheets before submission.
 
 ---
 
-## 🚀 Features
+# 🚀 Features
 
-* Upload Chargesheet Document
-* AI-based document analysis
-* Automatic checklist verification
+### 📄 Chargesheet Analysis
+
+* Upload PDF chargesheets
+* AI-powered legal document analysis
+* Automatic investigation checklist verification
 * Missing section detection
-* Legal compliance support
-* Simple and modern UI
+* Crime classification
+* IPC section extraction
+* Structured case summaries
+
+### 🤖 RAG-Based AI Chat Assistant
+
+* Chat with uploaded chargesheets
+* Semantic document retrieval
+* Context-aware legal question answering
+* FAISS vector database integration
+* Sentence Transformer embeddings
+* Natural language interaction with legal documents
+
+### 💡 Example Queries
+
+* “Who is the accused?”
+* “What IPC sections are mentioned?”
+* “Summarize the witness statements.”
+* “What evidence is available?”
+* “What is the case timeline?”
 
 ---
 
-## 🧠 How It Works
+# 🧠 How It Works
 
-1. User uploads a chargesheet document
-2. Backend extracts the document text
-3. AI analyzes the structure and legal sections
-4. System checks required legal elements
-5. Missing sections are highlighted
+1. User uploads a chargesheet PDF
+2. Backend extracts document text
+3. NLP pipeline processes legal sections
+4. Document is chunked for semantic retrieval
+5. Embeddings are generated using Sentence Transformers
+6. FAISS vector database stores embeddings
+7. User asks questions in natural language
+8. Relevant legal context is retrieved and displayed
 
 ---
 
-## 🏗 Project Architecture
+# 🏗 Project Architecture
 
+```text
 User Interface (Next.js)
         │
         ▼
-Frontend Upload System
+Frontend Upload + Chat System
         │
         ▼
-FastAPI / Flask Backend
+FastAPI Backend
         │
         ▼
-Document Processing (Python NLP)
+PDF Processing & NLP
         │
         ▼
-AI Analysis Engine
+Sentence Transformer Embeddings
         │
         ▼
-Checklist Verification
+FAISS Vector Database
         │
         ▼
-Results Displayed to User
-------------------------
+RAG-Based Retrieval Pipeline
+        │
+        ▼
+AI Legal Responses
+```
 
-## 🛠 Tech Stack
+---
 
-Frontend
+# 🛠 Tech Stack
+
+## Frontend
 
 * Next.js
 * React
 * Tailwind CSS
 
-Backend
+## Backend
 
+* FastAPI
 * Python
-* Flask / FastAPI
 
-AI / Processing
+## AI / NLP
 
-* NLP
-* Document Parsing
+* LangChain
+* FAISS
+* Sentence Transformers
+* PyMuPDF
+* RAG Pipeline
 
 ---
 
-## 📂 Project Structure
+# 📂 Project Structure
 
-```
+```text
 chargesheet-ai-assistant
 │
 ├── app.py
 ├── requirements.txt
+├── rag
+│   ├── loader.py
+│   ├── embeddings.py
+│   ├── chatbot.py
+│   └── vectorstore
+│
 ├── screenshots
 │
 └── chargesheet-frontend
     ├── app
-    ├── components
+    ├── public
     ├── package.json
+    └── components
 ```
 
 ---
 
-## 🖥 Screenshots
+# ⚙️ Installation & Setup
+
+## Clone Repository
+
+```bash
+git clone https://github.com/your-username/chargesheet-ai-assistant.git
+cd chargesheet-ai-assistant
+```
+
+---
+
+## Backend Setup
+
+```bash
+python -m venv venv
+```
+
+### Activate Virtual Environment
+
+#### Windows
+
+```bash
+venv\Scripts\activate
+```
+
+#### Linux/Mac
+
+```bash
+source venv/bin/activate
+```
+
+### Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Run Backend
+
+```bash
+python -m uvicorn app:app --reload --port 8001
+```
+
+---
+
+## Frontend Setup
+
+```bash
+cd chargesheet-frontend
+npm install
+npm run dev
+```
+
+Frontend runs on:
+
+```text
+http://localhost:3000
+```
+
+Backend runs on:
+
+```text
+http://127.0.0.1:8001
+```
+
+---
+
+# 🖥 Screenshots
 
 Add screenshots here after uploading them.
 
+Example:
+
+* Upload Interface
+* AI Analysis Results
+* RAG Chat Assistant
+* Investigation Checklist
+
 ---
 
-## 🎯 Future Improvements
+# 🎯 Future Improvements
 
-* Legal clause classification
+* OCR support for scanned PDFs
+* Multi-document chat
+* Legal timeline generation
 * FIR cross-verification
-* Automatic legal section suggestions
 * Multi-language support
+* Chat history persistence
+* AI-generated legal reports
+* Authentication & dashboard
+* Cloud vector database integration
 
 ---
 
-## 👩‍💻 Author
+# 🤝 Open for Contributions
+
+Contributions are always welcome 🚀
+
+You can contribute by:
+
+* Fixing bugs
+* Improving UI/UX
+* Enhancing NLP accuracy
+* Adding new AI capabilities
+* Optimizing backend performance
+* Improving documentation
+* Adding OCR or multilingual support
+
+## Contribution Steps
+
+1. Fork the repository
+2. Create a feature branch
+3. Make changes
+4. Commit changes
+5. Open a Pull Request
+
+Please follow clean coding practices and proper documentation standards.
+
+---
+
+# ⭐ Support the Project
+
+If you found this project useful, consider giving it a ⭐ on GitHub.
+
+Your support motivates future development and improvements 💙
+
+---
+
+# 👩‍💻 Author
 
 Kareena Kumari
 
 ---
 
-## 🤝 Open for Contributions
+# 📜 License
 
-Contributions are always welcome! 🚀
-
-If you'd like to improve this project, feel free to:
-
-* Fix bugs
-* Improve UI/UX
-* Add new AI features
-* Optimize backend performance
-* Improve documentation
-* Add OCR or multilingual support
-
-### Steps to Contribute
-
-1. Fork the repository
-2. Create a new branch
-3. Make your changes
-4. Commit your changes
-5. Open a Pull Request
-
-Please make sure your code follows clean coding practices and includes proper documentation.
-
----
-
-## ⭐ Support the Project
-
-If you found this project useful, consider giving it a ⭐ on GitHub!
-
-Your support motivates further development and improvements. 💙
-
-
-
-## 📜 License
-
-This project is created for academic and learning purposes.
+This project is created for academic, educational, and research purposes.
