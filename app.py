@@ -47,25 +47,44 @@ async def analyze(file: UploadFile = File(...)):
 
     text = ""
 
+    # -----------------------------
+    # Extract text from searchable PDF
+    # -----------------------------
     for page in doc:
         text += page.get_text()
 
+    # -----------------------------
+    # OCR fallback for scanned PDFs
+    # -----------------------------
+    if len(text.strip()) < 50:
+
+        from services.ocr import extract_text_from_scanned_pdf
+
+        temp_path = f"temp_{file.filename}"
+
+        with open(temp_path, "wb") as f:
+            f.write(pdf_bytes)
+
+        text = extract_text_from_scanned_pdf(temp_path)
+
     sentences = text.split("\n")
 
-    # -------- Stage 1 Extraction -------- #
-
-    fir = re.findall(r'\d+/\d{4}', text)
-    sections = re.findall(r'IPC\s?\d+', text)
+    # -----------------------------
+    # Stage 1 Extraction
+    # -----------------------------
+    fir = re.findall(r"\d+/\d{4}", text)
+    sections = re.findall(r"IPC\s?\d+", text)
 
     summary = {
         "fir_number": fir[0] if fir else "Not Found",
         "date": "Unknown",
         "police_station": "Unknown",
-        "sections": sections if sections else []
+        "sections": sections if sections else [],
     }
 
-    # -------- Crime Classification -------- #
-
+    # -----------------------------
+    # Crime Classification
+    # -----------------------------
     crime_type = "UNKNOWN"
 
     if "379" in text or "380" in text or "392" in text:
@@ -80,20 +99,22 @@ async def analyze(file: UploadFile = File(...)):
     elif "NDPS" in text:
         crime_type = "NDPS"
 
-    # -------- Stage-2 Semantic Similarity -------- #
-
+    # -----------------------------
+    # Semantic Similarity Checklist
+    # -----------------------------
     checklist = []
 
     item_embeddings = model.encode(checklist_items)
-
     sentence_embeddings = model.encode(sentences)
 
     for i, item in enumerate(checklist_items):
 
-        sims = cosine_similarity([item_embeddings[i]], sentence_embeddings)[0]
+        sims = cosine_similarity(
+            [item_embeddings[i]],
+            sentence_embeddings
+        )[0]
 
         best_score = max(sims)
-
         best_sentence = sentences[sims.argmax()]
 
         status = "MISSING"
@@ -107,17 +128,22 @@ async def analyze(file: UploadFile = File(...)):
         checklist.append({
             "item": item,
             "status": status,
-            "similarity_score": round(float(best_score),2),
+            "similarity_score": round(float(best_score), 2),
             "matched_text": best_sentence[:150]
         })
 
-    # -------- Stage-2A NER (Basic Rule Based) -------- #
-
+    # -----------------------------
+    # Simple NER
+    # -----------------------------
     entities = []
 
-    names = re.findall(r'[A-Z][a-z]+\s[A-Z][a-z]+', text)
+    names = re.findall(
+        r"[A-Z][a-z]+\s[A-Z][a-z]+",
+        text
+    )
 
     for n in names[:5]:
+
         entities.append({
             "text": n,
             "type": "PERSON"
@@ -129,7 +155,6 @@ async def analyze(file: UploadFile = File(...)):
         "checklist": checklist,
         "entities": entities
     }
-
 # ==============================
 # RAG CHATBOT FEATURE
 # ==============================
