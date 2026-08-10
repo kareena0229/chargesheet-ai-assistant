@@ -2,7 +2,7 @@
 
 AI-powered legal-tech platform that analyzes police chargesheets, detects missing legal sections, and enables contextual interaction with documents using Retrieval-Augmented Generation (RAG).
 
-The system helps investigators, legal officers, and law enforcement agencies validate chargesheets before submission.
+The system assists investigators, legal officers, and researchers in reviewing chargesheets more efficiently.
 
 ---
 
