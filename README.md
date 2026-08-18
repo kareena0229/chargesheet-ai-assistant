@@ -276,7 +276,7 @@ Kareena Kumari
 # 📜 License
 
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. 
 
 You are free to use, modify, and distribute this software for educational and open-source purposes.
 
