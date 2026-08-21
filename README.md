@@ -37,7 +37,7 @@ The system assists investigators, legal officers, and researchers in reviewing c
 
 ---
 
-# 🧠 How It Works
+# 🧠 How It Works 
 
 1. User uploads a chargesheet PDF
 2. Backend extracts document text
