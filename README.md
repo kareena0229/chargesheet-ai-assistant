@@ -6,7 +6,7 @@ The system assists investigators, legal officers, and researchers in reviewing c
 
 ---
 
-# 🚀 Features
+# 🚀 Features 
 
 ### 📄 Chargesheet Analysis
 
