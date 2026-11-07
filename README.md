@@ -1,4 +1,4 @@
-# ⚖️ ChargeSheet AI Assistant
+# # ⚖️ ChargeSheet AI Assistant — AI-Powered Legal Document Analysis
 
 AI-powered legal-tech platform that analyzes police chargesheets, detects missing legal sections, and enables contextual interaction with documents using Retrieval-Augmented Generation (RAG).
 

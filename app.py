@@ -1,14 +1,38 @@
-from fastapi import FastAPI, UploadFile, File
+
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import fitz
-import re
+from pydantic import BaseModel
+
+from services.ipc_classifier import classify_sections
+from services.pdf_ingestion import (
+    save_validated_pdf,
+    cleanup_temp_pdf
+)
+
 from rag.loader import load_and_split_pdf
 from rag.embeddings import create_vector_store
 from rag.chatbot import ask_question
+
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-from pydantic import BaseModel
-app = FastAPI()
+
+import fitz
+import re
+import logging
+
+
+# ==========================================
+# APPLICATION CONFIGURATION
+# ==========================================
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+app = FastAPI(
+    title="ChargeSheet AI Assistant",
+    description="AI-powered legal document analysis",
+    version="1.0.0"
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,173 +42,271 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# ==========================================
+# AI MODEL
+# ==========================================
+
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
+
+# ==========================================
+# INVESTIGATION CHECKLIST
+# ==========================================
+
 checklist_items = [
-"FIR number and date",
-"Police station name",
-"Place and time of occurrence",
-"Details of complainant and accused",
-"Description of stolen property and value",
-"Recovery/seizure memo of property",
-"Witness statements",
-"Site plan / spot inspection memo",
-"Arrest memo",
-"Chain of custody of recovered items"
+    "FIR number and date",
+    "Police station name",
+    "Place and time of occurrence",
+    "Details of complainant and accused",
+    "Description of stolen property and value",
+    "Recovery/seizure memo of property",
+    "Witness statements",
+    "Site plan / spot inspection memo",
+    "Arrest memo",
+    "Chain of custody of recovered items"
 ]
 
 
+# ==========================================
+# HOME ROUTE
+# ==========================================
+
 @app.get("/")
 def home():
-    return {"status": "Backend Running 🚀"}
+    return {
+        "status": "Backend Running",
+        "application": "ChargeSheet AI Assistant"
+    }
 
+
+# ==========================================
+# PDF CHARGESHEET ANALYSIS
+# ==========================================
 
 @app.post("/api/analyze")
 async def analyze(file: UploadFile = File(...)):
 
-    pdf_bytes = await file.read()
-    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    # Validate PDF and create a safe temporary file
+    temp_path = await save_validated_pdf(file)
 
-    text = ""
+    try:
 
-    # -----------------------------
-    # Extract text from searchable PDF
-    # -----------------------------
-    for page in doc:
-        text += page.get_text()
+        # ----------------------------------
+        # Extract text from searchable PDF
+        # ----------------------------------
 
-    # -----------------------------
-    # OCR fallback for scanned PDFs
-    # -----------------------------
-    if len(text.strip()) < 50:
+        with fitz.open(temp_path) as doc:
 
-        from services.ocr import extract_text_from_scanned_pdf
+            text = ""
 
-        temp_path = f"temp_{file.filename}"
+            for page in doc:
+                text += page.get_text()
 
-        with open(temp_path, "wb") as f:
-            f.write(pdf_bytes)
+        # ----------------------------------
+        # OCR fallback for scanned PDFs
+        # ----------------------------------
 
-        text = extract_text_from_scanned_pdf(temp_path)
+        if len(text.strip()) < 50:
 
-    sentences = text.split("\n")
+            from services.ocr import extract_text_from_scanned_pdf
 
-    # -----------------------------
-    # Stage 1 Extraction
-    # -----------------------------
-    fir = re.findall(r"\d+/\d{4}", text)
-    sections = re.findall(r"IPC\s?\d+", text)
+            text = extract_text_from_scanned_pdf(temp_path)
 
-    summary = {
-        "fir_number": fir[0] if fir else "Not Found",
-        "date": "Unknown",
-        "police_station": "Unknown",
-        "sections": sections if sections else [],
-    }
+        if not text.strip():
+            raise HTTPException(
+                status_code=422,
+                detail="No readable text could be extracted from the PDF."
+            )
 
-    # -----------------------------
-    # Crime Classification
-    # -----------------------------
-    crime_type = "UNKNOWN"
+        sentences = [
+            sentence.strip()
+            for sentence in text.split("\n")
+            if sentence.strip()
+        ]
 
-    if "379" in text or "380" in text or "392" in text:
-        crime_type = "Theft / Robbery"
+        if not sentences:
+            sentences = ["No readable text found"]
 
-    elif "323" in text or "324" in text:
-        crime_type = "Assault / Hurt"
+        # ----------------------------------
+        # STAGE 1: INFORMATION EXTRACTION
+        # ----------------------------------
 
-    elif "66C" in text or "66D" in text:
-        crime_type = "Cyber Fraud"
+        fir = re.findall(r"\d+/\d{4}", text)
 
-    elif "NDPS" in text:
-        crime_type = "NDPS"
+        sections = re.findall(
+            r"IPC\s?\d+",
+            text
+        )
 
-    # -----------------------------
-    # Semantic Similarity Checklist
-    # -----------------------------
-    checklist = []
+        summary = {
+            "fir_number": fir[0] if fir else "Not Found",
+            "date": "Unknown",
+            "police_station": "Unknown",
+            "sections": sections if sections else [],
+        }
 
-    item_embeddings = model.encode(checklist_items)
-    sentence_embeddings = model.encode(sentences)
+        # ----------------------------------
+        # IPC / BNS CLASSIFICATION
+        # ----------------------------------
 
-    for i, item in enumerate(checklist_items):
+        classification = classify_sections(text)
 
-        sims = cosine_similarity(
-            [item_embeddings[i]],
-            sentence_embeddings
-        )[0]
+        # ----------------------------------
+        # SEMANTIC SIMILARITY CHECKLIST
+        # ----------------------------------
 
-        best_score = max(sims)
-        best_sentence = sentences[sims.argmax()]
+        checklist = []
 
-        status = "MISSING"
+        item_embeddings = model.encode(checklist_items)
 
-        if best_score > 0.75:
-            status = "PRESENT"
+        sentence_embeddings = model.encode(sentences)
 
-        elif best_score > 0.55:
-            status = "PARTIAL"
+        for i, item in enumerate(checklist_items):
 
-        checklist.append({
-            "item": item,
-            "status": status,
-            "similarity_score": round(float(best_score), 2),
-            "matched_text": best_sentence[:150]
-        })
+            sims = cosine_similarity(
+                [item_embeddings[i]],
+                sentence_embeddings
+            )[0]
 
-    # -----------------------------
-    # Simple NER
-    # -----------------------------
-    entities = []
+            best_score = max(sims)
 
-    names = re.findall(
-        r"[A-Z][a-z]+\s[A-Z][a-z]+",
-        text
-    )
+            best_sentence = sentences[sims.argmax()]
 
-    for n in names[:5]:
+            status = "MISSING"
 
-        entities.append({
-            "text": n,
-            "type": "PERSON"
-        })
+            if best_score > 0.75:
+                status = "PRESENT"
 
-    return {
-        "summary": summary,
-        "crime_type": crime_type,
-        "checklist": checklist,
-        "entities": entities
-    }
-# ==============================
+            elif best_score > 0.55:
+                status = "PARTIAL"
+
+            checklist.append({
+                "item": item,
+                "status": status,
+                "similarity_score": round(
+                    float(best_score), 2
+                ),
+                "matched_text": best_sentence[:150]
+            })
+
+        # ----------------------------------
+        # SIMPLE NAMED ENTITY RECOGNITION
+        # ----------------------------------
+
+        entities = []
+
+        names = re.findall(
+            r"[A-Z][a-z]+\s[A-Z][a-z]+",
+            text
+        )
+
+        for name in names[:5]:
+
+            entities.append({
+                "text": name,
+                "type": "PERSON"
+            })
+
+        # ----------------------------------
+        # API RESPONSE
+        # ----------------------------------
+
+        return {
+            "summary": summary,
+            "classification": classification,
+            "checklist": checklist,
+            "entities": entities
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception:
+        logger.exception("Chargesheet analysis failed")
+
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to process the uploaded PDF."
+        )
+
+    finally:
+        # Always remove temporary PDF
+        cleanup_temp_pdf(temp_path)
+
+
+# ==========================================
 # RAG CHATBOT FEATURE
-# ==============================
+# ==========================================
 
 class ChatRequest(BaseModel):
     question: str
 
 
+# ==========================================
+# SECURE RAG PDF UPLOAD
+# ==========================================
+
 @app.post("/api/upload-rag")
 async def upload_rag(file: UploadFile = File(...)):
 
-    file_path = f"temp_{file.filename}"
+    # Apply the same PDF validation
+    temp_path = await save_validated_pdf(file)
 
-    with open(file_path, "wb") as f:
-        f.write(await file.read())
+    try:
 
-    chunks = load_and_split_pdf(file_path)
+        # Load and split validated PDF
+        chunks = load_and_split_pdf(temp_path)
 
-    create_vector_store(chunks)
+        if not chunks:
+            raise HTTPException(
+                status_code=422,
+                detail="No readable content found in the PDF."
+            )
 
-    return {
-        "message": "Document processed successfully"
-    }
+        # Create FAISS vector store
+        create_vector_store(chunks)
 
+        return {
+            "message": "Document processed successfully",
+            "chunks_created": len(chunks)
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception:
+        logger.exception("RAG PDF processing failed")
+
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to process the uploaded document."
+        )
+
+    finally:
+        # Always remove temporary PDF
+        cleanup_temp_pdf(temp_path)
+
+
+# ==========================================
+# CHAT WITH CHARGESHEET
+# ==========================================
 
 @app.post("/api/chat")
 async def chat(req: ChatRequest):
 
-    answer = ask_question(req.question)
+    try:
 
-    return {
-        "answer": answer
-    }
+        answer = ask_question(req.question)
+
+        return {
+            "answer": answer
+        }
+
+    except Exception:
+        logger.exception("Chat request failed")
+
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to process your question."
+        )
