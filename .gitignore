@@ -19,3 +19,5 @@ temp_*.pdf
 
 # macOS
 .DS_Store
+# Temporary PDFs created during secure ingestion
+chargesheet_*.pdf
