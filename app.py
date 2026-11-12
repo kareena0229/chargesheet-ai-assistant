@@ -1,6 +1,7 @@
 
 import logging
 import re
+from uuid import uuid4
 
 import fitz
 from fastapi import FastAPI, UploadFile, File, HTTPException
@@ -18,10 +19,15 @@ from services.pdf_ingestion import (
     cleanup_temp_pdf,
 )
 
+
+# Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+
+# FastAPI application
+app = FastAPI(title="Chargesheet AI Assistant")
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,8 +37,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# Existing semantic similarity model
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
+
+# Existing checklist
 checklist_items = [
     "FIR number and date",
     "Police station name",
@@ -49,20 +59,27 @@ checklist_items = [
 
 @app.get("/")
 def home():
-    return {"status": "Backend Running Successfully"}
+    return {
+        "status": "Backend Running Successfully"
+    }
 
+
+# ==========================================
+# PDF ANALYSIS
+# ==========================================
 
 @app.post("/api/analyze")
 async def analyze(file: UploadFile = File(...)):
+
     temp_path = None
 
     try:
-        # Validate the PDF and save it using a server-generated filename.
+        # Ticket 1: Validate and securely save PDF.
         temp_path = await save_validated_pdf(file)
 
-        # Extract text from the PDF.
         text = ""
 
+        # Extract searchable PDF text.
         with fitz.open(temp_path) as doc:
             for page in doc:
                 text += page.get_text()
@@ -70,6 +87,7 @@ async def analyze(file: UploadFile = File(...)):
         # OCR fallback for scanned PDFs.
         if len(text.strip()) < 50:
             from services.ocr import extract_text_from_scanned_pdf
+
             text = extract_text_from_scanned_pdf(temp_path)
 
         if not text or not text.strip():
@@ -123,6 +141,7 @@ async def analyze(file: UploadFile = File(...)):
         sentence_embeddings = model.encode(sentences)
 
         for i, item in enumerate(checklist_items):
+
             sims = cosine_similarity(
                 [item_embeddings[i]],
                 sentence_embeddings
@@ -135,6 +154,7 @@ async def analyze(file: UploadFile = File(...)):
 
             if best_score > 0.75:
                 status = "PRESENT"
+
             elif best_score > 0.55:
                 status = "PARTIAL"
 
@@ -171,6 +191,7 @@ async def analyze(file: UploadFile = File(...)):
 
     except Exception:
         logger.exception("PDF analysis failed.")
+
         raise HTTPException(
             status_code=500,
             detail="Unable to process the uploaded PDF."
@@ -181,42 +202,53 @@ async def analyze(file: UploadFile = File(...)):
             cleanup_temp_pdf(temp_path)
 
 
-# RAG chatbot feature.
+# ==========================================
+# TICKET 2: DOCUMENT-ISOLATED RAG
+# ==========================================
 
 class ChatRequest(BaseModel):
     question: str
+    document_id: str
 
 
 @app.post("/api/upload-rag")
 async def upload_rag(file: UploadFile = File(...)):
+
     temp_path = None
 
+    # Generate a unique identifier for every upload.
+    document_id = str(uuid4())
+
     try:
-        # Apply the same validation and secure temporary-file handling.
+        # Reuse Ticket 1 PDF validation.
         temp_path = await save_validated_pdf(file)
 
+        # Extract and split document.
         chunks = load_and_split_pdf(temp_path)
 
         if not chunks:
             raise HTTPException(
                 status_code=422,
-                detail="No readable content could be extracted from the PDF."
+                detail="No readable content found in the PDF."
             )
 
-        create_vector_store(chunks)
+        # Create an isolated FAISS index.
+        create_vector_store(chunks, document_id)
 
         return {
-            "message": "Document processed successfully"
+            "message": "Document processed successfully",
+            "document_id": document_id
         }
 
     except HTTPException:
         raise
 
     except Exception:
-        logger.exception("RAG PDF processing failed.")
+        logger.exception("RAG document upload failed.")
+
         raise HTTPException(
             status_code=500,
-            detail="Unable to process the uploaded PDF."
+            detail="Unable to process the uploaded document."
         )
 
     finally:
@@ -226,8 +258,34 @@ async def upload_rag(file: UploadFile = File(...)):
 
 @app.post("/api/chat")
 async def chat(req: ChatRequest):
-    answer = ask_question(req.question)
 
-    return {
-        "answer": answer
-    }
+    try:
+        answer = ask_question(
+            req.question,
+            req.document_id
+        )
+
+        return {
+            "document_id": req.document_id,
+            "answer": answer
+        }
+
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid document ID."
+        )
+
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail="Document index not found. Please upload the document first."
+        )
+
+    except Exception:
+        logger.exception("Document-specific retrieval failed.")
+
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to retrieve information from this document."
+        )
