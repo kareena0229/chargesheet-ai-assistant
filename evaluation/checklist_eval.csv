@@ -1,0 +1,31 @@
+﻿example_id,checklist_item,text_excerpt,expected_status,label_reason
+E001,FIR number and date,FIR No. 124/2026 was registered on 12 October 2026 at the police station.,PRESENT,Both FIR number and registration date are explicitly provided.
+E002,FIR number and date,The case diary refers to FIR No. 87/2026 but does not mention its registration date.,PARTIAL,FIR number is available but date is missing.
+E003,FIR number and date,The investigating officer visited the market and recorded statements from two witnesses.,MISSING,No FIR number or registration date is provided.
+E004,Police station name,"The complaint was registered at Kotwali Police Station, Patna.",PRESENT,The police station name is explicitly identified.
+E005,Police station name,The complaint was forwarded to the local police station for necessary action.,PARTIAL,Police station involvement is mentioned but its name is absent.
+E006,Police station name,The accused was questioned regarding the missing property.,MISSING,No police station information is provided.
+E007,Place and time of occurrence,The incident occurred near Gandhi Maidan at approximately 8:30 PM on 10 October 2026.,PRESENT,Both location and time of occurrence are specified.
+E008,Place and time of occurrence,"The incident took place near Gandhi Maidan, Patna, but the exact time is not recorded.",PARTIAL,Location is provided but time is missing.
+E009,Place and time of occurrence,The complainant submitted an application to the investigating officer.,MISSING,No occurrence location or time is provided.
+E010,Details of complainant and accused,"The complaint was filed by Rajesh Kumar against accused Mohan Singh, whose address is recorded in the case diary.",PRESENT,The complainant and accused are identified with supporting details.
+E011,Details of complainant and accused,"The complainant Rajesh Kumar submitted the written complaint, but no accused person has been identified.",PARTIAL,Complainant details are present but accused details are missing.
+E012,Details of complainant and accused,The seized articles were deposited in the police station store room.,MISSING,No complainant or accused details are provided.
+E013,Description of stolen property and value,"The stolen property consisted of a red motorcycle valued at approximately Rs. 75,000.",PRESENT,The property description and estimated value are provided.
+E014,Description of stolen property and value,"The complainant reported that a red motorcycle was stolen, but its estimated value is not mentioned.",PARTIAL,Property description is available but value is missing.
+E015,Description of stolen property and value,The investigating officer inspected the location and prepared a site sketch.,MISSING,No stolen property description or value is provided.
+E016,Recovery/seizure memo of property,A seizure memo dated 13 October 2026 records the recovery of one red motorcycle in the presence of two witnesses.,PRESENT,Recovery and seizure documentation are explicitly described.
+E017,Recovery/seizure memo of property,"The motorcycle was recovered from the accused, but the case diary does not mention preparation of a seizure memo.",PARTIAL,Recovery is mentioned but the required memo is not documented.
+E018,Recovery/seizure memo of property,The complainant provided a list of missing household articles.,MISSING,No recovery or seizure memo is mentioned.
+E019,Witness statements,Statements of eyewitnesses Suresh Kumar and Amit Kumar were recorded by the investigating officer during the investigation.,PRESENT,Statements of two eyewitnesses are explicitly recorded.
+E020,Witness statements,"The investigating officer recorded the statement of one eyewitness, but statements from other identified witnesses are not available.",PARTIAL,One witness statement is recorded but other identified witness statements are unavailable.
+E021,Witness statements,The case diary mentions inspection of the incident location but contains no recorded witness statements.,MISSING,No witness statements are documented.
+E022,Site plan / spot inspection memo,"The investigating officer inspected the scene and prepared a site plan showing the entrance, exit and location of the incident.",PRESENT,Scene inspection and preparation of a site plan are explicitly documented.
+E023,Site plan / spot inspection memo,"The investigating officer visited the scene and noted its location, but no site plan is attached to the case diary.",PARTIAL,Scene inspection is documented but the site plan is absent.
+E024,Site plan / spot inspection memo,The accused was questioned at the police station and his statement was recorded.,MISSING,No site inspection or site plan information is provided.
+E025,Arrest memo,The accused was arrested on 14 October 2026 and an arrest memo containing the time and place of arrest was prepared.,PRESENT,Arrest and preparation of the arrest memo are documented.
+E026,Arrest memo,"The case diary records that the accused was taken into custody, but the arrest memo is not included.",PARTIAL,Arrest is mentioned but the arrest memo is absent.
+E027,Arrest memo,The investigating officer visited the complainant's residence to collect additional information.,MISSING,No arrest or arrest memo information is provided.
+E028,Chain of custody of recovered items,"The recovered motorcycle was sealed, labelled and deposited in the malkhana with its property register entry recorded.",PRESENT,Sealing and documented transfer and storage of recovered property are described.
+E029,Chain of custody of recovered items,"The recovered mobile phone was deposited in the police station store room, but the sealing and transfer records are not mentioned.",PARTIAL,Storage is documented but the complete chain of custody is not described.
+E030,Chain of custody of recovered items,The complainant identified the missing property during the investigation.,MISSING,"No handling, transfer or storage records for recovered evidence are provided."

@@ -1,0 +1,19 @@
+﻿example_id,checklist_item,text_excerpt,expected_status,label_reason,predicted_status,similarity_score,prediction_correct
+E001,FIR number and date,FIR No. 124/2026 was registered on 12 October 2026 at the police station.,PRESENT,Both FIR number and registration date are explicitly provided.,MISSING,0.517,False
+E002,FIR number and date,The case diary refers to FIR No. 87/2026 but does not mention its registration date.,PARTIAL,FIR number is available but date is missing.,MISSING,0.4663,False
+E003,FIR number and date,The investigating officer visited the market and recorded statements from two witnesses.,MISSING,No FIR number or registration date is provided.,MISSING,0.1085,True
+E004,Police station name,"The complaint was registered at Kotwali Police Station, Patna.",PRESENT,The police station name is explicitly identified.,MISSING,0.3353,False
+E005,Police station name,The complaint was forwarded to the local police station for necessary action.,PARTIAL,Police station involvement is mentioned but its name is absent.,MISSING,0.3781,False
+E006,Police station name,The accused was questioned regarding the missing property.,MISSING,No police station information is provided.,MISSING,0.1464,True
+E007,Place and time of occurrence,The incident occurred near Gandhi Maidan at approximately 8:30 PM on 10 October 2026.,PRESENT,Both location and time of occurrence are specified.,MISSING,0.2791,False
+E008,Place and time of occurrence,"The incident took place near Gandhi Maidan, Patna, but the exact time is not recorded.",PARTIAL,Location is provided but time is missing.,MISSING,0.3587,False
+E009,Place and time of occurrence,The complainant submitted an application to the investigating officer.,MISSING,No occurrence location or time is provided.,MISSING,0.1027,True
+E010,Details of complainant and accused,"The complaint was filed by Rajesh Kumar against accused Mohan Singh, whose address is recorded in the case diary.",PRESENT,The complainant and accused are identified with supporting details.,PARTIAL,0.5607,False
+E011,Details of complainant and accused,"The complainant Rajesh Kumar submitted the written complaint, but no accused person has been identified.",PARTIAL,Complainant details are present but accused details are missing.,PARTIAL,0.5938,True
+E012,Details of complainant and accused,The seized articles were deposited in the police station store room.,MISSING,No complainant or accused details are provided.,MISSING,0.1798,True
+E013,Description of stolen property and value,"The stolen property consisted of a red motorcycle valued at approximately Rs. 75,000.",PRESENT,The property description and estimated value are provided.,PARTIAL,0.5649,False
+E014,Description of stolen property and value,"The complainant reported that a red motorcycle was stolen, but its estimated value is not mentioned.",PARTIAL,Property description is available but value is missing.,MISSING,0.5054,False
+E015,Description of stolen property and value,The investigating officer inspected the location and prepared a site sketch.,MISSING,No stolen property description or value is provided.,MISSING,0.1433,True
+E016,Recovery/seizure memo of property,A seizure memo dated 13 October 2026 records the recovery of one red motorcycle in the presence of two witnesses.,PRESENT,Recovery and seizure documentation are explicitly described.,PARTIAL,0.6142,False
+E017,Recovery/seizure memo of property,"The motorcycle was recovered from the accused, but the case diary does not mention preparation of a seizure memo.",PARTIAL,Recovery is mentioned but the required memo is not documented.,MISSING,0.5455,False
+E018,Recovery/seizure memo of property,The complainant provided a list of missing household articles.,MISSING,No recovery or seizure memo is mentioned.,MISSING,0.1647,True
