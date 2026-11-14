@@ -1,0 +1,65 @@
+{
+    "sample_count": 30,
+    "class_labels": [
+        "PRESENT",
+        "PARTIAL",
+        "MISSING"
+    ],
+    "thresholds": {
+        "present": "> 0.75",
+        "partial": "> 0.55 and <= 0.75",
+        "missing": "<= 0.55"
+    },
+    "accuracy": 0.43333333333333335,
+    "classification_report": {
+        "PRESENT": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0
+        },
+        "PARTIAL": {
+            "precision": 0.375,
+            "recall": 0.3,
+            "f1-score": 0.3333333333333333,
+            "support": 10.0
+        },
+        "MISSING": {
+            "precision": 0.45454545454545453,
+            "recall": 1.0,
+            "f1-score": 0.625,
+            "support": 10.0
+        },
+        "accuracy": 0.43333333333333335,
+        "macro avg": {
+            "precision": 0.27651515151515155,
+            "recall": 0.43333333333333335,
+            "f1-score": 0.3194444444444444,
+            "support": 30.0
+        },
+        "weighted avg": {
+            "precision": 0.2765151515151515,
+            "recall": 0.43333333333333335,
+            "f1-score": 0.3194444444444444,
+            "support": 30.0
+        }
+    },
+    "confusion_matrix": [
+        [
+            0,
+            5,
+            5
+        ],
+        [
+            0,
+            3,
+            7
+        ],
+        [
+            0,
+            0,
+            10
+        ]
+    ],
+    "evaluation_scope": "Synthetic dataset; results apply only to the supplied examples. The current dataset covers ten distinct checklist requirements."
+}
