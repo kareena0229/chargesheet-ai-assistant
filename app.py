@@ -57,6 +57,10 @@ checklist_items = [
 ]
 
 
+# ==========================================
+# HOME ROUTE
+# ==========================================
+
 @app.get("/")
 def home():
     return {
@@ -211,6 +215,10 @@ class ChatRequest(BaseModel):
     document_id: str
 
 
+# ==========================================
+# SECURE RAG PDF UPLOAD
+# ==========================================
+
 @app.post("/api/upload-rag")
 async def upload_rag(file: UploadFile = File(...)):
 
@@ -255,6 +263,14 @@ async def upload_rag(file: UploadFile = File(...)):
         if temp_path:
             cleanup_temp_pdf(temp_path)
 
+    finally:
+        # Always remove temporary PDF
+        cleanup_temp_pdf(temp_path)
+
+
+# ==========================================
+# CHAT WITH CHARGESHEET
+# ==========================================
 
 @app.post("/api/chat")
 async def chat(req: ChatRequest):

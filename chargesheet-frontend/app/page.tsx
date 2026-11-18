@@ -7,8 +7,8 @@ export default function Home() {
 
   const [file, setFile] = useState<File | null>(null);
   const [summary, setSummary] = useState<any>(null);
-  const [classification, setClassification] = useState("");
-  const [checklist, setChecklist] = useState<any[]>([]);
+const [classification, setClassification] = useState<any>(null);
+const [checklist, setChecklist] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [question, setQuestion] = useState("");
@@ -43,8 +43,9 @@ export default function Home() {
       const data = await res.json();
 
       setSummary(data.summary);
-      setClassification(data.crime_type);
-      setChecklist(data.checklist);
+setClassification(data.classification);
+setChecklist(data.checklist);
+
 
       // Upload to RAG
       await fetch(
@@ -195,22 +196,78 @@ export default function Home() {
 
 
       {/* Classification */}
-      {classification && (
+   {classification && (
 
-<div className="bg-white border border-gray-300 p-6 rounded-xl shadow-lg mb-6 text-black">
+     <div className="bg-white border border-gray-300 p-6 rounded-xl shadow-lg mb-6">
 
-          <h2 className="text-xl font-bold text-slate-900 mb-3">
-            Crime Classification
-          </h2>
+<h2 className="text-xl font-bold text-slate-900 mb-5">
+⚖️ AI Legal Classification
+</h2>
 
-          <p className="text-green-700 font-semibold text-lg">
-            {classification}
-          </p>
+<div className="space-y-3">
 
-        </div>
+<p>
+<strong>Crime:</strong> {classification.crime}
+</p>
 
-      )}
+<p>
+<strong>Category:</strong> {classification.category}
+</p>
 
+<p>
+<strong>Confidence:</strong>{" "}
+{classification.confidence
+  ? `${(classification.confidence * 100).toFixed(0)}%`
+  : "N/A"}
+</p>
+
+</div>
+
+<hr className="my-5"/>
+
+<h3 className="font-bold mb-2">
+Detected Sections
+</h3>
+<ul className="list-disc ml-6">
+  {classification.suggested_sections?.length === 0 ? (
+    <li>No suggestions</li>
+  ) : (
+    classification.suggested_sections.map((sec: any, index: number) => (
+      <li key={index}>IPC {sec}</li>
+    ))
+  )}
+</ul>
+<hr className="my-5"/>
+
+<h3 className="font-bold mb-2">
+Suggested Related Sections
+</h3>
+
+<ul className="list-disc ml-6">
+
+{classification.suggested_sections?.length === 0 ?
+
+(
+<li>No suggestions</li>
+)
+
+:
+
+classification.suggested_sections.map((sec:any,index:number)=>(
+
+<li key={index}>
+IPC {sec}
+</li>
+
+))
+
+}
+
+</ul>
+
+</div>
+
+)}
 
       {/* Checklist */}
       {checklist.length > 0 && (
