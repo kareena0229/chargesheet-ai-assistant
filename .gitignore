@@ -20,3 +20,9 @@ chargesheet_*.pdf
 
 # macOS
 .DS_Store
+
+# Local FAISS indexes and test data
+rag/vectorstore/
+
+# Temporary uploaded PDFs
+chargesheet_*.pdf

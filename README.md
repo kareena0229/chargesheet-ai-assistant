@@ -6,7 +6,7 @@ The system assists investigators, legal officers, and researchers in reviewing c
 
 ---
 
-# 🚀 Features
+# 🚀 Features 
 
 ### 📄 Chargesheet Analysis
 
@@ -37,7 +37,7 @@ The system assists investigators, legal officers, and researchers in reviewing c
 
 ---
 
-# 🧠 How It Works
+# 🧠 How It Works 
 
 1. User uploads a chargesheet PDF
 2. Backend extracts document text
@@ -276,7 +276,7 @@ Kareena Kumari
 # 📜 License
 
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. 
 
 You are free to use, modify, and distribute this software for educational and open-source purposes.
 
